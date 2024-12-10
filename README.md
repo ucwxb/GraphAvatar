@@ -1,7 +1,7 @@
 # GraphAvatar: Compact Head Avatars with GNN-Generated 3D Gaussians
 
 > [GraphAvatar: Compact Head Avatars with GNN-Generated 3D Gaussians](./assets/AAAI25_GraphAvatar.pdf)  
-> [Xiaobao Wei](https://ucwxb.github.io/), [Peng Chen](https://chenvoid.github.io/), Guangyu Li, [Ming Lu](https://lu-m13.github.io/), Hui Chen $^\dagger$ , Feng Tian  
+> [Xiaobao Wei](https://ucwxb.github.io/), [Peng Chen](https://chenvoid.github.io/), [Ming Lu](https://lu-m13.github.io/), Hui Chen $^\dagger$ , Feng Tian  
 > AAAI2025 Main Conference Paper  
 > $\dagger$ Corresponding author
 
