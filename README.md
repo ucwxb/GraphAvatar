@@ -23,7 +23,7 @@ If you find this project helpful, please consider citing the our paper:
 ```
 @article{wei2025graphavatar,
   title={GraphAvatar: Compact Head Avatars with GNN-Generated 3D Gaussians},
-  author={Wei, Xiaobao and Cao, Jiajun and Jin, Yizhu and Lu, Ming and Wang, Guangyu and Zhang, Shanghang},
+  author={Wei, Xiaobao and Chen, Peng and Lu, Ming and Chen, Hui and Tian, Feng},
   booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
   year={2025}
 }
