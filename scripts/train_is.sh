@@ -34,7 +34,3 @@ CUDA_VISIBLE_DEVICES=$1 python train.py \
 --enable_scaffold \
 --scaffold_feat_dim 4 \
 --scaffold_n_offsets 2 \
-# --start_checkpoint /data1/wxb/GraphAvatar/GraphAvatar/chkpnt60000_28.4370.pth \
-# --start_checkpoint /data1/wxb/GraphAvatar/GraphAvatar/chkpnt10000_3.4639.pth \
-
-# --dataset_debug \

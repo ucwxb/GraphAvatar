@@ -21,16 +21,9 @@ Rendering photorealistic head avatars from arbitrary viewpoints is crucial for v
 ## Getting Started
 
 ### Environmental Setups
-Our code is developed on Ubuntu 20.04 using Python 3.8 and pytorch=1.12.0+cu113. We recommend using conda for the installation of dependencies.
+We recommend using conda for the installation of dependencies. Please enter the following command step by step for preparing the environment.
 
 ```bash
-
-git clone https://github.com/ucwxb/GraphAvatar
-cd GraphAvatar
-conda env create -f env.yaml
-conda activate GraphAvatar
-
-pip install -r requirements.txt
 sudo apt-get install -y \
     freeglut3-dev \
     python3-opengl \
@@ -39,18 +32,20 @@ sudo apt-get install -y \
     mesa-common-dev \
     libxmu-dev \
     libxi-dev
-pip install PyOpenGL PyOpenGL-accelerate
-pip install https://data.pyg.org/whl/torch-1.12.0%2Bcu116/torch_cluster-1.6.0%2Bpt112cu116-cp39-cp39-linux_x86_64.whl
-pip install https://data.pyg.org/whl/torch-1.12.0%2Bcu116/torch_scatter-2.1.0%2Bpt112cu116-cp39-cp39-linux_x86_64.whl
-pip install https://data.pyg.org/whl/torch-1.12.0%2Bcu116/torch_sparse-0.6.16%2Bpt112cu116-cp39-cp39-linux_x86_64.whl
 
+git clone https://github.com/ucwxb/GraphAvatar
+cd GraphAvatar
+conda env create -f env.yaml
+conda activate GraphAvatar
+
+pip install -r requirements.txt
+pip install PyOpenGL PyOpenGL-accelerate
 pip install https://data.pyg.org/whl/torch-2.0.0%2Bcu118/torch_cluster-1.6.3%2Bpt20cu118-cp39-cp39-linux_x86_64.whl
 pip install https://data.pyg.org/whl/torch-2.0.0%2Bcu118/torch_sparse-0.6.18%2Bpt20cu118-cp39-cp39-linux_x86_64.whl
 pip install https://data.pyg.org/whl/torch-2.0.0%2Bcu118/torch_scatter-2.1.2%2Bpt20cu118-cp39-cp39-linux_x86_64.whl
-
-
 pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 
+# for submodules
 cd submodules/diff-gaussian-rasterization
 pip install -e .
 
@@ -61,78 +56,47 @@ pip install -e .
 cd ../..
 cd submodules/mesh
 python setup.py install
-
-sed -i 's/out = op(src, index, dim, None, dim_size, fill_value)/out = op(src, index, dim=dim, out=None, dim_size=dim_size)/' $CONDA_PREFIX/lib/python3.9/site-packages/torch_geometric/utils/scatter.py
 ```
 
-### Preparing Dataset and checkpoint of SAM
-To validate the performance of binary polyp segmentation, we have provided the [link](https://drive.google.com/drive/folders/101LDnr7Gget7ehZQkHCNH1csD2WCCBX6?usp=sharing) for datasets sessile-Kvasir and CVC. 
-Please create a new folder named "dataset", download and unzip the two datasets into the folder.
+### Preparing Dataset
+We conduct experiments on [INSTA](https://github.com/Zielon/INSTA) and [NBS](https://github.com/USTC3DV/NeRFBlendShape-code). To enable a fair comparison, we use the face tracking tool [metrical-tracker](https://github.com/Zielon/metrical-tracker) to retrack NBS dataset. We also provide a sample scene Justin on INSTA dataset on the [google drive](https://drive.google.com/file/d/1FMtk1ceoKqEymmCo13Sc6VSsMDOA8RRU/view?usp=sharing). Please download and unzip it into the dataset folder. 
 
 ```bash
+# to download sample scene on google drive
+pip install gdown
 mkdir dataset
+cd dataset
 # download and move the zip files into the folder
+gdown 1FMtk1ceoKqEymmCo13Sc6VSsMDOA8RRU
+unzip insta.zip
+```
+In addition to the face tracking data, to warmup Graphavatar through pseudo 3DGS attributes, you need to train each scene on the vanilla 3DGS for 30000 iterations and copy "point_cloud.ply" into each scene. 
 
-unzip sessile-Kvasir.zip
-unzip CVC.zip
-```
-Please donwload ViT-B SAM checkpoint from this [link](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth) and place it into the "sam_ckp" folder.
-```bash
-mkdir sam_ckp
-cd sam_ckp
-wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
-```
 Finally the file structure is organized as:
 ```
-I-MedSAM
+GraphAvatar
 ├── dataset
-│   ├── sessile-Kvasir
-│   |   ├── train
-│   |   ├── val
-│   |   ├── test
-│   ├── CVC
-│   |   ├── PNG
-│   |   |   ├── Ground Truth
-│   |   |   ├── Original
-├── sam_ckp
-│   ├── sam_vit_b_01ec64.pth
+│   ├── insta
+│   |   ├── justin
+│   |   |   ├── point_cloud.ply (pseudo 3DGS for warmup)
+│   |   |   ├── other tracking parameters and folders
+│   |   ├── ...
+│   ├── nbs
+│   |   ├── id1
+│   |   ├── ...
 └── other codes...
 ```
 
 ### Training
 
-For training on sessile-Kvasir with the image shape 384x384, please run:
+For training on the sample scene, please run:
 ```bash
-# for single GPU
-bash scripts/train/train_sessile.sh
-
-# for multi GPU. The current settings are for 8 GPUs. If you have less GPUs, please change CUDA_VISIBLE_DEVICES and nproc_per_node.
-bash scripts/train/train_sessile_multi.sh
+# params 1: which GPU. params 2: which scene. 
+bash scripts/train_is.sh 0 justin
 ```
-Then you can find checkpoints and training logs into the folder "work_dir".
+Then you can find checkpoints and training logs into the folder "output".
 
-### Evaluation and Visualization
-The checkpoint trained on sessile-Kvasir can be found [here](https://drive.google.com/file/d/1qd1FNoc3Io2g8t9HCjaELNYxOHLoiVO0/view?usp=sharing). 
-Please download it and place it into the folder "work_dir".
-You can follow the test scripts for testing on different experiments settings:
-```bash
-# test with shape 384x384
-bash scripts/test/test_sessile.sh
-
-# cross resolution: from 384 to 128, it changes the param "--label_size" from 384 to 128
-bash scripts/test/test_sessile_384_to_128.sh
-
-# cross resolution: from 384 to 896, it changes the param "--label_size" from 384 to 896
-bash scripts/test/test_sessile_384_to_896.sh
-
-# cross domain: from sessile-Kvasir to CVC, it set the param "--data_path" to the path of CVC
-bash scripts/test/test_sessile_to_CVC.sh
-```
-You can also modify the param "--resume" as the path of your trained checkpoint.
-The test process also supports running on multi GPU, which is the same as training. 
-Please refer to the test scripts to change from single GPU into multi GPU.
-
-to visualize the segmentation masks, you can add the argument "--save_pic" into the scripts to save results.
+To continue a training process, You can also modify the param "--start_checkpoint" as the path of your trained checkpoint.
 
 
 ## Citation

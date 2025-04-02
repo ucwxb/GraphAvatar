@@ -170,3 +170,4 @@ insta-dataset/**
 warmup_gaussian/**
 tracker/*
 visualization/*
+*.pth
